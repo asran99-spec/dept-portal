@@ -512,7 +512,7 @@
   <div class="wrap">
     <div class="sec-head">
       <h2>공개 가이드 자료실</h2>
-      <p>식당 선정과 진행에 참고할 수 있는 공개 가이드(PDF)와 운영 관리용 엑셀 파일입니다. 자체 제작한 일반 실무 참고용 자료이며, 실제 식당 가격·영업·주차·예약 조건 및 회사 경비 규정은 별도 확인하세요.</p>
+      <p>식당 선정과 진행에 참고할 수 있는 공개 가이드(PDF)입니다. 자체 제작한 일반 실무 참고용 자료이며, 실제 식당 가격·영업·주차·예약 조건 및 회사 경비 규정은 별도 확인하세요.</p>
     </div>
     <div class="filters" id="docFilters">
       <button class="pill active" data-cat="all">전체</button>
@@ -520,7 +520,6 @@
       <button class="pill" data-cat="회식 준비">회식 준비</button>
       <button class="pill" data-cat="접대 준비">접대 준비</button>
       <button class="pill" data-cat="예약·정보">예약·정보</button>
-      <button class="pill" data-cat="운영 자료">운영 자료</button>
     </div>
     <div class="table-wrap">
       <table class="files">
@@ -617,41 +616,7 @@ const DOCS = [
    "식당에 직접 확인할 사항: 전체 좌석/독립 룸 인원, 주차 지원, 무료 주차·발렛·등록 조건, 가격·운영 여부",
    "‘확인 필요’를 불가나 가능으로 자동 치환하지 않음(단, 룸·주차 ‘필수’에서는 미확인 식당 제외)"
   ]
- },
- {
-  "id": "G005",
-  "cat": "운영 자료",
-  "title": "FAQ·이용가이드 관리 엑셀",
-  "desc": "포탈 FAQ와 단계별 이용 가이드를 관리하는 엑셀 파일",
-  "file": "files/DINING_PICK_FAQ_수정.xlsx",
-  "saveAs": "DINING_PICK_FAQ_수정.xlsx",
-  "size": 14489,
-  "fmt": "XLSX",
-  "order": 5,
-  "date": "2026-11-17",
-  "items": [
-   "시트 3개: FAQ_관리 · 이용가이드 · 작성안내",
-   "FAQ의 분류·질문·답변·표시 순서·공개 여부를 행 단위로 관리",
-   "작성안내 시트에 작성 방법과 운영 기준 수록"
-  ]
- },
- {
-  "id": "G006",
-  "cat": "운영 자료",
-  "title": "자료실 목록 관리 엑셀",
-  "desc": "자료실에 표시할 파일 목록을 관리하는 엑셀 파일",
-  "file": "files/DINING_PICK_자료실_수정.xlsx",
-  "saveAs": "DINING_PICK_자료실_수정.xlsx",
-  "size": 6335,
-  "fmt": "XLSX",
-  "order": 6,
-  "date": "2026-11-17",
-  "items": [
-   "시트 2개: 자료실_관리 · 연동안내",
-   "자료 ID·분류·제목·설명·파일명(상대경로)·형식·공개 여부·표시 순서를 관리"
-  ]
  }
-
 ];
 
 /* ===== 유틸 ===== */
@@ -662,6 +627,8 @@ const byId = id => RESTAURANTS.find(r => r.id === id);
 const won = n => n == null ? "확인 필요" : (n/10000).toLocaleString("ko-KR", {maximumFractionDigits:1}) + "만원";
 const priceRange = r => r.min == null ? "확인 필요" : (r.max == null ? `${won(r.min)}~ (상한 확인 필요)` : (r.min === r.max ? won(r.min) : `${won(r.min)}~${won(r.max)}`));
 const safeUrl = u => /^https?:\/\//.test(u || "") ? u : "";
+/* 사이트 대표 주소(경로 없음)는 식당 페이지가 아니므로 지도 링크에서 제외 */
+const mapUrl = u => { const v = safeUrl(u); if (!v) return ""; try { const x = new URL(v); return (x.pathname === "/" || x.pathname === "") && !x.search && !x.hash ? "" : v; } catch (e) { return ""; } };
 let compare = [];
 
 const CUISINES = [...new Set(RESTAURANTS.map(r => r.cuisine))].sort((a,b) => a.localeCompare(b,"ko"));
@@ -749,8 +716,8 @@ function readParams(){
 /* ===== 카드 ===== */
 function card(r, ev){
   const inCmp = compare.includes(r.id);
-  const url = safeUrl(r.map);
-  const tel = r.tel ? `<a class="link" href="tel:${esc(r.tel.replace(/[^0-9+]/g,""))}">${esc(r.tel)}</a>` : "";
+  const url = mapUrl(r.map);
+  const tel = r.tel ? (/\d/.test(r.tel) ? `<a class="link" href="tel:${esc(r.tel.replace(/[^0-9+]/g,""))}">${esc(r.tel)}</a>` : `<span class="sub">${esc(r.tel)}</span>`) : "";
   return `<article class="rest">
     <div class="top">
       <div><h3>${esc(r.name)}</h3><div class="sub">${esc(r.cuisine)} · ${esc(r.menu)}</div></div>
@@ -859,7 +826,7 @@ function renderCompare(){
       ${row("접대 적합도", r => `${esc(r.bizFit)} (기본 ${r.bizBase}점)`)}
       ${row("운영 상태", r => esc(r.status))}
       ${row("주소", r => esc(r.addr))}
-      ${row("연락·지도", r => (r.tel ? esc(r.tel) + "<br>" : "") + (safeUrl(r.map) ? `<a class="link" href="${esc(r.map)}" target="_blank" rel="noopener noreferrer">지도 보기</a>` : ""))}
+      ${row("연락·지도", r => (r.tel ? esc(r.tel) + "<br>" : "") + (mapUrl(r.map) ? `<a class="link" href="${esc(mapUrl(r.map))}" target="_blank" rel="noopener noreferrer">지도 보기</a>` : ""))}
     </tbody></table></div>
     <p class="sub" style="margin-top:10px">※ 녹색: 최저 최소가격 / 최단 도보 / 확인된 최대 수용 / 룸·주차 보유 확인. 수용 인원은 '수용 인원 기준' 문구를 함께 확인하세요.</p>`;
 }
