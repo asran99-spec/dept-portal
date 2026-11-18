@@ -8,6 +8,7 @@
 |---|---|
 | `index.html` | 포탈 본체. 식당 데이터·FAQ·자료실 목록이 이 파일 안에 들어 있습니다. |
 | `files/` | 자료실에서 여는 PDF 가이드 4건과 엑셀 파일 2건(`DINING_PICK_FAQ_수정.xlsx`, `DINING_PICK_자료실_수정.xlsx`) |
+| `files/preview.png` | 링크 공유 시 보이는 대표 이미지(1200×630). 공개 주소는 `index.html` 상단 og:url·og:image·canonical에 지정(`https://asran99-spec.github.io/dept-portal/`), 주소가 바뀌면 세 곳을 함께 수정 |
 | `이전버전/` | 이름 변경 전 원본(`restaurant-portal_v2.html`) 사본 |
 
 `index.html`과 `files/` 폴더는 항상 같은 위치에 두어야 자료실의 '다운로드' 버튼이 동작합니다. 두 개를 함께 옮기거나 공유하세요.
